@@ -9,9 +9,7 @@ function App(props) {
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.jsx</code> and save to reload.
-        </p>
+        <p>This isn't using react!</p>
         <a
           className="App-link"
           href="https://reactjs.org"

@@ -15,12 +15,23 @@ function Counter(props) {
   }, [inputState]);
 
   return (
-    <div>
+    <div style="font-family: sans-serif;">
       <h1>
         {inputState}, the counter is {state}
       </h1>
-      <button onClick={() => setState((p) => p + 2)}>Click me</button>
-      <input value={inputState} onInput={(e) => setInput(e.target.value)} />
+      <p>
+        <button
+          style="border-radius: 4px; border: none; padding: 1em;"
+          onClick={() => setState((p) => p + 2)}
+        >
+          Click me
+        </button>
+      </p>
+      <input
+        style="border-radius: 4px; border: none; padding: 0.5em; margin: 1em;"
+        value={inputState}
+        onInput={(e) => setInput(e.target.value)}
+      />
       <div id="children">{props.children}</div>
     </div>
   );
@@ -30,7 +41,9 @@ VDom.render(
   <App>
     <Counter>
       <div>Hi</div>
+      <p>These children are in an array and that's ok</p>
     </Counter>
+    <h4>Yo</h4>
   </App>,
 
   container,
