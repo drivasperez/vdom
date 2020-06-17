@@ -3,17 +3,9 @@
 import VDom from './vdom';
 const container = document.getElementById('root');
 
-const updateValue = (e) => rerender(e.target.value);
+function App(props) {
+  return <h1>Hello {props.name}</h1>;
+}
 
-const rerender = (value) => {
-  const element = (
-    <div>
-      <input id="dan" onInput={updateValue} value={value} />
-      <h2>Hello {value}</h2>
-    </div>
-  );
-  VDom.render(element, container);
-};
-
-rerender('World');
-
+const element = <App name="foo" />;
+VDom.render(element, container);

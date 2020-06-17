@@ -52,13 +52,19 @@ function commitWork(fiber) {
   if (!fiber) {
     return;
   }
-  const domParent = fiber.parent.dom;
+  let domParentFiber = fiber.parent;
+  // Go up the tree until you find a fiber with a real dom node.
+  // (i.e. not a function component)
+  while (!domParentFiber.dom) {
+    domParentFiber = domParentFiber.parent;
+  }
+  const domParent = domParentFiber.dom;
 
   if (fiber.effectTag === 'PLACEMENT' && fiber.dom != null) {
     domParent.appendChild(fiber.dom);
   }
   if (fiber.effectTag === 'DELETION') {
-    domParent.removeChild(fiber.dom);
+    commitDeletion(fiber, domParent);
   }
   if (fiber.effectTag === 'UPDATE') {
     updateDom(fiber.dom, fiber.alternate.props, fiber.props);
@@ -66,6 +72,15 @@ function commitWork(fiber) {
 
   commitWork(fiber.child);
   commitWork(fiber.sibling);
+}
+
+function commitDeletion(fiber, domParent) {
+  // Go up the tree (recursively this time?) until you find the nearest real dom node to remove.
+  if (fiber.dom) {
+    domParent.removeChild(fiber.dom);
+  } else {
+    commitDeletion(fiber.child, domParent);
+  }
 }
 
 function workLoop(deadline) {
@@ -141,14 +156,13 @@ function reconcileChildren(wipFiber, elements) {
 }
 
 function performUnitOfWork(fiber) {
-  // Create actual dom node if it doesn't exist
-  if (!fiber.dom) {
-    fiber.dom = createDom(fiber);
+  const isFunctionComponent = fiber.type instanceof Function;
+  if (isFunctionComponent) {
+    updateFunctionComponent(fiber);
+  } else {
+    // It's a normal node
+    updateHostComponent(fiber);
   }
-
-  const elements = fiber.props.children;
-
-  reconcileChildren(fiber, elements);
 
   // Treverse fiber tree, first look for children, then siblings,
   // then go to parent and try again for siblings.
@@ -162,6 +176,21 @@ function performUnitOfWork(fiber) {
     }
     nextFiber = nextFiber.parent;
   }
+}
+
+function updateFunctionComponent(fiber) {
+  // Run the function to get its children.
+  const children = [fiber.type(fiber.props)];
+  reconcileChildren(fiber, children);
+}
+
+function updateHostComponent(fiber) {
+  // Create actual dom node if it doesn't exist
+  if (!fiber.dom) {
+    fiber.dom = createDom(fiber);
+  }
+
+  reconcileChildren(fiber, fiber.props.children);
 }
 
 function createDom(fiber) {
