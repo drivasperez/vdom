@@ -1,17 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import './index.css';
+/** @jsx VDom.createElement */
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root'),
+import VDom from './vdom';
+
+const element = (
+  <div id="hi">
+    <h1>Hello!</h1>
+    <ul>
+      <li>This is</li>
+      <li>Pretty bloody</li>
+      <li>Cool</li>
+    </ul>
+  </div>
 );
 
-// Hot Module Replacement (HMR) - Remove this snippet to remove HMR.
-// Learn more: https://www.snowpack.dev/#hot-module-replacement
-if (import.meta.hot) {
-  import.meta.hot.accept();
-}
+const container = document.getElementById('root');
+VDom.render(element, container);
