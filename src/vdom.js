@@ -186,7 +186,7 @@ function updateFunctionComponent(fiber) {
   hookIndex = 0;
   wipFiber.hooks = [];
   const children = [fiber.type(fiber.props)];
-  reconcileChildren(fiber, children);
+  reconcileChildren(fiber, children.flat());
 }
 
 function updateHostComponent(fiber) {
@@ -195,7 +195,7 @@ function updateHostComponent(fiber) {
     fiber.dom = createDom(fiber);
   }
 
-  reconcileChildren(fiber, fiber.props.children);
+  reconcileChildren(fiber, fiber.props.children.flat());
 }
 
 function createDom(fiber) {

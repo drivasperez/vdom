@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+/** @jsx VDom.createElement */
+
+import VDom from './vdom';
 import logo from './logo.svg';
 import './App.css';
 
-function App() {
+function App(props) {
   return (
     <div className="App">
       <header className="App-header">
@@ -15,9 +17,9 @@ function App() {
           href="https://reactjs.org"
           target="_blank"
           rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        ></a>
+
+        {props.children}
       </header>
     </div>
   );
