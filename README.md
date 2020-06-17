@@ -1,4 +1,4 @@
-# New Project
+# fake react
 
 VDom + render to DOM + useState + useEffect.
 
@@ -9,3 +9,4 @@ VDom + render to DOM + useState + useEffect.
 - refs
 - useReducer
 - useLayoutEffect
+- fragments
