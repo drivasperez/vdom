@@ -77,7 +77,7 @@ function commitWork(fiber) {
 }
 
 function commitDeletion(fiber, domParent) {
-  // Go up the tree (recursively this time?) until you find the nearest real dom node to remove.
+  // Go down the tree until you find the base dom node to remove.
   if (fiber.dom) {
     domParent.removeChild(fiber.dom);
   } else {
@@ -166,7 +166,7 @@ function performUnitOfWork(fiber) {
     updateHostComponent(fiber);
   }
 
-  // Treverse fiber tree, first look for children, then siblings,
+  // Traverse fiber tree, first look for children, then siblings,
   // then go to parent and try again for siblings.
   if (fiber.child) {
     return fiber.child;
@@ -243,6 +243,33 @@ function createTextElement(text) {
   };
 }
 
+function useEffect(effect, dependencies) {
+  const oldHook =
+    wipFiber.alternate &&
+    wipFiber.alternate.hooks &&
+    wipFiber.alternate.hooks[hookIndex];
+
+  const skip =
+    oldHook?.dependencies &&
+    dependencies?.every((dep, i) => dep === oldHook.dependencies[i]);
+
+  let hook;
+  if (skip) {
+    hook = oldHook;
+  } else {
+    if (oldHook?.cleanup) oldHook.cleanup();
+    const cleanup = effect();
+
+    hook = {
+      dependencies,
+      cleanup,
+    };
+  }
+
+  wipFiber.hooks.push(hook);
+  hookIndex++;
+}
+
 function useState(initial) {
   const oldHook =
     wipFiber.alternate &&
@@ -267,6 +294,7 @@ function useState(initial) {
       props: currentRoot.props,
       alternate: currentRoot,
     };
+    // Throw away the current tree and rerender.
     nextUnitOfWork = wipRoot;
     deletions = [];
   };
@@ -280,6 +308,7 @@ const VDom = {
   render,
   createElement,
   useState,
+  useEffect,
 };
 
 export default VDom;
