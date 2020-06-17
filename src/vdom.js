@@ -2,6 +2,8 @@ import { isProperty, isNew, isGone, isEvent } from './utils';
 
 let nextUnitOfWork = null;
 let wipRoot = null;
+let wipFiber = null;
+let hookIndex = null;
 let currentRoot = null;
 let deletions = null;
 
@@ -180,6 +182,9 @@ function performUnitOfWork(fiber) {
 
 function updateFunctionComponent(fiber) {
   // Run the function to get its children.
+  wipFiber = fiber;
+  hookIndex = 0;
+  wipFiber.hooks = [];
   const children = [fiber.type(fiber.props)];
   reconcileChildren(fiber, children);
 }
@@ -238,9 +243,43 @@ function createTextElement(text) {
   };
 }
 
+function useState(initial) {
+  const oldHook =
+    wipFiber.alternate &&
+    wipFiber.alternate.hooks &&
+    wipFiber.alternate.hooks[hookIndex];
+
+  const hook = {
+    state:
+      oldHook?.state ?? (initial instanceof Function ? initial() : initial),
+    queue: [],
+  };
+
+  const actions = oldHook?.queue ?? [];
+  actions.forEach((action) => {
+    hook.state = action instanceof Function ? action(hook.state) : action;
+  });
+
+  const setState = (action) => {
+    hook.queue.push(action);
+    wipRoot = {
+      dom: currentRoot.dom,
+      props: currentRoot.props,
+      alternate: currentRoot,
+    };
+    nextUnitOfWork = wipRoot;
+    deletions = [];
+  };
+
+  wipFiber.hooks.push(hook);
+  hookIndex++;
+  return [hook.state, setState];
+}
+
 const VDom = {
   render,
   createElement,
+  useState,
 };
 
 export default VDom;
