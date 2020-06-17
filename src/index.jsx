@@ -1,17 +1,19 @@
 /** @jsx VDom.createElement */
 
 import VDom from './vdom';
-
-const element = (
-  <div id="hi">
-    <h1>Hello!</h1>
-    <ul>
-      <li>This is</li>
-      <li>Pretty bloody</li>
-      <li>Cool</li>
-    </ul>
-  </div>
-);
-
 const container = document.getElementById('root');
-VDom.render(element, container);
+
+const updateValue = (e) => rerender(e.target.value);
+
+const rerender = (value) => {
+  const element = (
+    <div>
+      <input id="dan" onInput={updateValue} value={value} />
+      <h2>Hello {value}</h2>
+    </div>
+  );
+  VDom.render(element, container);
+};
+
+rerender('World');
+
