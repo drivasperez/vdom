@@ -22,7 +22,11 @@ function updateDom(dom, prevProps, nextProps) {
     .filter(isProperty)
     .filter(isGone(prevProps, nextProps))
     .forEach((name) => {
-      dom[name] = '';
+      if (name in dom) {
+        dom[name] = '';
+      } else {
+        dom.removeAttribute(name);
+      }
     });
 
   // Add new event listeners
@@ -39,7 +43,12 @@ function updateDom(dom, prevProps, nextProps) {
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
-      dom[name] = nextProps[name];
+      // property or attribute?
+      if (name in dom) {
+        dom[name] = nextProps[name];
+      } else {
+        dom.setAttribute(name, nextProps[name]);
+      }
     });
 }
 

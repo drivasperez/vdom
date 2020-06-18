@@ -16,13 +16,13 @@ function Counter(props) {
 
   return (
     <div style="font-family: sans-serif;">
-      <h1>
+      <h1 cool-attrib={state % 2 === 0 ? 'hey' : ''}>
         {inputState}, the counter is {state}
       </h1>
       <p>
         <button
           style="border-radius: 4px; border: none; padding: 1em;"
-          onClick={() => setState((p) => p + 2)}
+          onClick={() => setState((p) => p + 1)}
         >
           Click me
         </button>
