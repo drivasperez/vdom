@@ -4,6 +4,34 @@ import VDom from './vdom';
 import App from './App';
 const container = document.getElementById('root');
 
+function TestKeys() {
+  const [items, setItems] = VDom.useState([
+    { id: '1', value: 'List item 1' },
+    { id: '2', value: 'List item 2' },
+    { id: '3', value: 'List item 3' },
+  ]);
+
+  console.log(items);
+
+  const flipIt = () => setItems(prev => prev.reverse());
+
+  return (
+    <div>
+      <button
+        style="border-radius: 4px; border: none; padding: 1em;"
+        onClick={flipIt}
+      >
+        Flip array
+      </button>
+      <ul>
+        {items.map(item => {
+          return <li key={item.id}>{item.value}</li>;
+        })}
+      </ul>
+    </div>
+  );
+}
+
 function Counter(props) {
   const [state, setState] = VDom.useState(1);
   const [inputState, setInput] = VDom.useState('Hello World');
@@ -49,7 +77,6 @@ function Counter(props) {
       <div id="children">{props.children}</div>
       <ul>
         {items.map(item => {
-          console.log('Rendering:', item);
           return <li key={item.id}>{item.value}</li>;
         })}
         <li>Hmm...</li>
@@ -60,6 +87,8 @@ function Counter(props) {
     </div>
   );
 }
+
+// VDom.render(<TestKeys />, container);
 
 VDom.render(
   <App>

@@ -79,6 +79,13 @@ function commitWork(fiber) {
   }
   if (fiber.effectTag === 'UPDATE') {
     updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+    if (fiber.parent.dom && fiber.dom) {
+      // Has the dom node's position moved? (Basically, is it keyed)
+      if (fiber.parent.dom?.childNodes[fiber.index] !== fiber.dom) {
+        const referent = fiber.parent.dom?.childNodes[fiber.index];
+        domParent.insertBefore(fiber.dom, referent);
+      }
+    }
   }
 
   commitWork(fiber.child);
@@ -139,13 +146,10 @@ function reconcileChildren(wipFiber, elements) {
     let newFiber = null;
 
     let oldFiber;
-    if (
-      element.props.key !== undefined &&
-      keyedElements.has(element.props.key)
-    ) {
-      console.log('Found a key:', element.props.key);
+    if (element.props.key !== undefined) {
       oldFiber = keyedElements.get(element.props.key);
       keyedElements.delete(element.props.key);
+      element.referent = prevSibling?.dom;
     } else {
       oldFiber = unkeyedElements.shift();
     }
@@ -162,6 +166,7 @@ function reconcileChildren(wipFiber, elements) {
         parent: wipFiber,
         alternate: oldFiber,
         effectTag: 'UPDATE',
+        index,
       };
     }
     if (element && !sameType) {
@@ -179,10 +184,6 @@ function reconcileChildren(wipFiber, elements) {
       // delete an old node
       oldFiber.effectTag = 'DELETION';
       deletions.push(oldFiber);
-    }
-
-    if (oldFiber) {
-      oldFiber = oldFiber.sibling;
     }
 
     if (index === 0) {
