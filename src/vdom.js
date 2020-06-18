@@ -11,8 +11,8 @@ function updateDom(dom, prevProps, nextProps) {
   // Remove old or changed event listeners
   Object.keys(prevProps)
     .filter(isEvent)
-    .filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
-    .forEach((name) => {
+    .filter(key => !(key in nextProps) || isNew(prevProps, nextProps)(key))
+    .forEach(name => {
       const eventType = name.toLowerCase().substring(2);
       dom.removeEventListener(eventType, prevProps[name]);
     });
@@ -21,7 +21,7 @@ function updateDom(dom, prevProps, nextProps) {
   Object.keys(prevProps)
     .filter(isProperty)
     .filter(isGone(prevProps, nextProps))
-    .forEach((name) => {
+    .forEach(name => {
       if (name in dom) {
         dom[name] = '';
       } else {
@@ -33,7 +33,7 @@ function updateDom(dom, prevProps, nextProps) {
   Object.keys(nextProps)
     .filter(isEvent)
     .filter(isNew(prevProps, nextProps))
-    .forEach((name) => {
+    .forEach(name => {
       const eventType = name.toLowerCase().substring(2);
       dom.addEventListener(eventType, nextProps[name]);
     });
@@ -42,7 +42,7 @@ function updateDom(dom, prevProps, nextProps) {
   Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
-    .forEach((name) => {
+    .forEach(name => {
       // property or attribute?
       if (name in dom) {
         dom[name] = nextProps[name];
@@ -112,16 +112,46 @@ requestIdleCallback(workLoop);
 
 function reconcileChildren(wipFiber, elements) {
   let index = 0;
-  let oldFiber = wipFiber.alternate && wipFiber.alternate.child;
+  let nodeToTraverse = wipFiber.alternate?.child;
   let prevSibling = null;
 
+  let keyedElements = new Map();
+  let unkeyedElements = [];
+
+  // Go through all the existing nodes, divide into
+  // keyed and unkeyed.
+  while (nodeToTraverse !== undefined) {
+    if (nodeToTraverse.props.key) {
+      keyedElements.set(nodeToTraverse.props.key, nodeToTraverse);
+    } else {
+      unkeyedElements.push(nodeToTraverse);
+    }
+    nodeToTraverse = nodeToTraverse.sibling;
+  }
+
   // Go through children, append them to this fiber.
-  while (index < elements.length || oldFiber != null) {
+  while (
+    index < elements.length ||
+    unkeyedElements.length > 0 ||
+    keyedElements.size > 0
+  ) {
     const element = elements[index];
     let newFiber = null;
 
+    let oldFiber;
+    if (
+      element.props.key !== undefined &&
+      keyedElements.has(element.props.key)
+    ) {
+      console.log('Found a key:', element.props.key);
+      oldFiber = keyedElements.get(element.props.key);
+      keyedElements.delete(element.props.key);
+    } else {
+      oldFiber = unkeyedElements.shift();
+    }
+
     // Compare oldFiber to element.
-    const sameType = oldFiber && element && element.type == oldFiber.type;
+    const sameType = oldFiber && element?.type == element.type;
 
     if (sameType) {
       // Update the node
@@ -235,8 +265,8 @@ function createElement(type, props, ...children) {
     type,
     props: {
       ...props,
-      children: children.map((child) =>
-        typeof child === 'object' ? child : createTextElement(child),
+      children: children.map(child =>
+        typeof child === 'object' ? child : createTextElement(child)
       ),
     },
   };
@@ -292,11 +322,11 @@ function useState(initial) {
   };
 
   const actions = oldHook?.queue ?? [];
-  actions.forEach((action) => {
+  actions.forEach(action => {
     hook.state = action instanceof Function ? action(hook.state) : action;
   });
 
-  const setState = (action) => {
+  const setState = action => {
     hook.queue.push(action);
     wipRoot = {
       dom: currentRoot.dom,
