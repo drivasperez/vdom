@@ -4,8 +4,8 @@ VDom + render to DOM + useState + useEffect.
 
 ## ToDo
 
-- reconcile arrays by key
 - general reconciler performance
+- code organisation
 - refs
 - useReducer
 - useLayoutEffect
