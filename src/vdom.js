@@ -81,6 +81,9 @@ function commitWork(fiber) {
     updateDom(fiber.dom, fiber.alternate.props, fiber.props);
     if (fiber.parent.dom && fiber.dom) {
       // Has the dom node's position moved? (Basically, is it keyed)
+      // TODO: This is slow! We shouldn't need to look into the DOM
+      // to see if its order has changed... And if the order has changed because
+      // something before it has been removed, we shouldn't do anything.
       if (fiber.parent.dom?.childNodes[fiber.index] !== fiber.dom) {
         const referent = fiber.parent.dom?.childNodes[fiber.index];
         domParent.insertBefore(fiber.dom, referent);
