@@ -9,4 +9,6 @@ VDom + render to DOM + useState + useEffect.
 - refs
 - useReducer
 - useLayoutEffect
+- useMemo
+- useCallback
 - fragments
